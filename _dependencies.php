@@ -37,13 +37,16 @@ use GaletteOAuth2\Repositories\ClientRepository;
 use GaletteOAuth2\Repositories\RefreshTokenRepository;
 use GaletteOAuth2\Repositories\ScopeRepository;
 use GaletteOAuth2\Repositories\UserRepository;
+use GaletteOAuth2\Repositories\ClaimRepository;
 use GaletteOAuth2\Tools\Config;
 use GaletteOAuth2\Tools\Debug as Debug;
 use League\OAuth2\Server\AuthorizationServer;
-use League\OAuth2\Server\Grant\AuthCodeGrant;
 use League\OAuth2\Server\Grant\RefreshTokenGrant;
 use League\OAuth2\Server\ResourceServer;
 use Psr\Container\ContainerInterface;
+use Idaas\OpenID\Grant\AuthCodeGrant;
+use Idaas\OpenID\RequestTypes\AuthenticationRequest;
+use Idaas\OpenID\Session;
 
 if (OAUTH2_LOG) {
     Debug::init();
@@ -80,11 +83,16 @@ $container->set(
             Key::loadFromAsciiSafeString($encryptionKey),
         );
 
-        $refreshTokenRepository = new RefreshTokenRepository();
+	$refreshTokenRepository = new RefreshTokenRepository();
+	$claimRepository = new ClaimRepository();
+
         $grant = new AuthCodeGrant(
             new AuthCodeRepository(),
             // instance of RefreshTokenRepositoryInterface
-            $refreshTokenRepository,
+	    $refreshTokenRepository,
+	    $claimRepository,
+	    new Session,
+	    new DateInterval('PT10M'),
             new DateInterval('PT10M'),
         );
 
