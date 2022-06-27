@@ -33,9 +33,10 @@ declare(strict_types=1);
 namespace GaletteOAuth2\Repositories;
 
 use GaletteOAuth2\Entities\AccessTokenEntity;
-use League\OAuth2\Server\Entities\AccessTokenEntityInterface;
 use League\OAuth2\Server\Entities\ClientEntityInterface;
-use League\OAuth2\Server\Repositories\AccessTokenRepositoryInterface;
+use Idaas\OpenID\Entities\AccessTokenEntityInterface;
+use League\OAuth2\Server\Entities\AccessTokenEntityInterface as LeagueAccessTokenEntityInterface;
+use Idaas\OpenID\Repositories\AccessTokenRepositoryInterface;
 
 final class AccessTokenRepository implements AccessTokenRepositoryInterface
 {
@@ -77,5 +78,24 @@ final class AccessTokenRepository implements AccessTokenRepositoryInterface
         $accessToken->setUserIdentifier($userIdentifier);
 
         return $accessToken;
-    }
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public function getAccessToken($tokenId)
+	{
+		// TODO
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public function storeClaims(LeagueAccessTokenEntityInterface $token, array $claims)
+	{
+		foreach($claims as $claim)
+		{
+			$token->addClaim($claim);
+		}
+	}
 }
