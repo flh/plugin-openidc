@@ -25,21 +25,37 @@ declare(strict_types=1);
  *  @category Plugins
  *  @package  Plugin OAuth2 for Galette Project
  *
- *  @author    Manuel Hervouet <manuelh78dev@ik.me>
+ *  @author	Manuel Hervouet <manuelh78dev@ik.me>
  *  @copyright Manuel Hervouet (c) 2021
  *  @license   http://www.gnu.org/licenses/gpl-3.0.html GPL License 3.0
  */
 
 namespace GaletteOAuth2\Entities;
 
-use League\OAuth2\Server\Entities\AccessTokenEntityInterface;
-use League\OAuth2\Server\Entities\Traits\AccessTokenTrait;
+use Idaas\OpenID\Entities\AccessTokenEntityInterface;
+use Idaas\OpenID\Entities\Traits\AccessTokenTrait;
+use Idaas\OpenID\Entities\ClaimEntityInterface;
 use League\OAuth2\Server\Entities\Traits\EntityTrait;
 use League\OAuth2\Server\Entities\Traits\TokenEntityTrait;
 
 final class AccessTokenEntity implements AccessTokenEntityInterface
 {
-    use AccessTokenTrait;
-    use TokenEntityTrait;
-    use EntityTrait;
+	use AccessTokenTrait;
+	use TokenEntityTrait;
+	use EntityTrait;
+
+	/**
+	 * @var ClaimEntityInterface[]
+	 */
+	protected $claims = [];
+
+	public function getClaims()
+	{
+		return $this->claims;
+	}
+
+	public function addClaim(ClaimEntityInterface $claim)
+	{
+		$this->claims[$claim->getIdentifier()] = $claim;
+	}
 }
