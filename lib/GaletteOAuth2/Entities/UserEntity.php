@@ -34,8 +34,22 @@ namespace GaletteOAuth2\Entities;
 
 use League\OAuth2\Server\Entities\Traits\EntityTrait;
 use League\OAuth2\Server\Entities\UserEntityInterface;
+use Galette\Entity\Adherent;
 
 final class UserEntity implements UserEntityInterface
 {
-    use EntityTrait;
+	use EntityTrait;
+
+	private Adherent $galette_user;
+
+	public function __construct(Adherent $user)
+	{
+		$this->galette_user = $user;
+		$this->setIdentifier($member->id);
+	}
+
+	public function getAdherent()
+	{
+		return $this->galette_user;
+	}
 }
