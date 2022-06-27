@@ -33,31 +33,23 @@ declare(strict_types=1);
 namespace GaletteOAuth2\Entities;
 
 use Idaas\OpenID\Entities\ClaimEntityInterface;
+namespace League\OAuth2\Server\Entities\Traits;
 
 class ClaimEntity implements ClaimEntityInterface
 {
     const TYPE_ID_TOKEN = 'id_token';
 	const TYPE_USERINFO = 'userinfo';
 
-	private $identifier;
+	use EntityTrait;
+
 	private $type;
 	private $essential;
 
 	public function __construct($identifier, $type, $essential)
 	{
-		$this->identifier = $identifier;
+		$this->setIdentifier($identifier);
 		$this->type = $type;
 		$this->essential = $essential;
-	}
-
-    /**
-     * Get the scope's identifier.
-     *
-     * @return string
-     */
-	public function getIdentifier()
-	{
-		return $this->identifier;
 	}
 
     /**
