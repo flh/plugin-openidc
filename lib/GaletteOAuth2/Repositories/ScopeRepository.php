@@ -25,7 +25,7 @@ declare(strict_types=1);
  *  @category Plugins
  *  @package  Plugin OAuth2 for Galette Project
  *
- *  @author    Manuel Hervouet <manuelh78dev@ik.me>
+ *  @author	Manuel Hervouet <manuelh78dev@ik.me>
  *  @copyright Manuel Hervouet (c) 2021
  *  @license   http://www.gnu.org/licenses/gpl-3.0.html GPL License 3.0
  */

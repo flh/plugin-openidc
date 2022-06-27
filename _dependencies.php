@@ -113,7 +113,6 @@ $container->set(
             new DateInterval('PT1H'),
         );
 
-        //--
         $userRepository = new UserRepository($container); // instance of UserRepositoryInterface
         $grant = new \League\OAuth2\Server\Grant\PasswordGrant(
             $userRepository,
