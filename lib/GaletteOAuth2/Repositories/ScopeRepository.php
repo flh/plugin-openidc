@@ -38,19 +38,34 @@ use League\OAuth2\Server\Repositories\ScopeRepositoryInterface;
 
 final class ScopeRepository implements ScopeRepositoryInterface
 {
+	public static $scopes = [
+        'basic' => [
+            'description' => 'Basic details about you',
+        ],
+        'email' => [
+            'description' => 'Your email address',
+		],
+		'openid' => [
+			'description' => 'OpenID Connect user information',
+		],
+		'galette' => [
+			'description' => 'Galette membership status and information',
+		],
+		'profile' => [
+			'description' => 'Extended personnal user information',
+		],
+	];
+
+	public static function getScopes()
+	{
+		return self::$scopes;
+	}
+
     /**
      * {@inheritDoc}
      */
     public function getScopeEntityByIdentifier($scopeIdentifier)
     {
-        $scopes = [
-            'basic' => [
-                'description' => 'Basic details about you',
-            ],
-            'email' => [
-                'description' => 'Your email address',
-            ],
-        ];
 
         if (\array_key_exists($scopeIdentifier, $scopes) === false) {
             return;
