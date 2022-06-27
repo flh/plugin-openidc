@@ -63,9 +63,20 @@ class ClaimRepository implements ClaimRepositoryInterface
 		],
 	];
 
-	public function getScopeClaims()
+	public static function getScopeClaims()
 	{
 		return self::$scopeClaims;
+	}
+
+	public static function getAllClaims()
+	{
+		$res = [];
+		foreach(self::getScopeClaims() as $claims) {
+			foreach($claims as $claim) {
+				$res[] = $claim[0];
+			}
+		}
+		return $res;
 	}
 
     /**

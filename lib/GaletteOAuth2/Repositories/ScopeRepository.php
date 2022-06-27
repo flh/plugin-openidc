@@ -39,11 +39,11 @@ use League\OAuth2\Server\Repositories\ScopeRepositoryInterface;
 final class ScopeRepository implements ScopeRepositoryInterface
 {
 	public static $scopes = [
-        'basic' => [
-            'description' => 'Basic details about you',
-        ],
-        'email' => [
-            'description' => 'Your email address',
+		'basic' => [
+			'description' => 'Basic details about you',
+		],
+		'email' => [
+			'description' => 'Your email address',
 		],
 		'openid' => [
 			'description' => 'OpenID Connect user information',
@@ -61,39 +61,39 @@ final class ScopeRepository implements ScopeRepositoryInterface
 		return self::$scopes;
 	}
 
-    /**
-     * {@inheritDoc}
-     */
-    public function getScopeEntityByIdentifier($scopeIdentifier)
-    {
+	/**
+	 * {@inheritDoc}
+	 */
+	public function getScopeEntityByIdentifier($scopeIdentifier)
+	{
 
-        if (\array_key_exists($scopeIdentifier, $scopes) === false) {
-            return;
-        }
+		if (\array_key_exists($scopeIdentifier, $scopes) === false) {
+			return;
+		}
 
-        $scope = new ScopeEntity();
-        $scope->setIdentifier($scopeIdentifier);
+		$scope = new ScopeEntity();
+		$scope->setIdentifier($scopeIdentifier);
 
-        return $scope;
-    }
+		return $scope;
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    public function finalizeScopes(
-        array $scopes,
-        $grantType,
-        ClientEntityInterface $clientEntity,
-        $userIdentifier = null
-    ) {
-        /*TODO : ?
-                // Example of programatically modifying the final scope of the access token
-                if ((int) $userIdentifier === 1) {
-                    $scope = new ScopeEntity();
-                    $scope->setIdentifier('email');
-                    $scopes[] = $scope;
-                }
-         */
-        return $scopes;
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	public function finalizeScopes(
+		array $scopes,
+		$grantType,
+		ClientEntityInterface $clientEntity,
+		$userIdentifier = null
+	) {
+		/*TODO : ?
+				// Example of programatically modifying the final scope of the access token
+				if ((int) $userIdentifier === 1) {
+					$scope = new ScopeEntity();
+					$scope->setIdentifier('email');
+					$scopes[] = $scope;
+				}
+		 */
+		return $scopes;
+	}
 }
