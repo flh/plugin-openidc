@@ -33,16 +33,99 @@ declare(strict_types=1);
 namespace GaletteOAuth2\Repositories;
 
 use League\OAuth2\Server\Entities\ClientEntityInterface;
-use League\OAuth2\Server\Repositories\UserRepositoryInterface;
+use IDaas\OpenID\Repositories\UserRepositoryInterface;
+use IDaas\OpenID\Repositories\UserRepositoryTrait;
 use Psr\Container\ContainerInterface as ContainerInterface;
+use Galette\Entity\Adherent;
+use GaletteOAuth2\Entities\UserEntity;
+use Galette\Entity\Status as GaletteStatus;
 
 final class UserRepository implements UserRepositoryInterface
 {
-    private $container;
+	use UserRepositoryTrait;
+
+	private $container;
 
     public function __construct(ContainerInterface $container)
     {
         $this->container = $container;
+    }
+
+    public function getAttributes(UserEntity $userEntity, $claims, $scopes)
+	{
+		$attributes = [
+			'sub' => $userEntity->getIdentifier(),
+		];
+
+		$adherent = $userEntity->getAdherent();
+
+		if(in_array('profile', $scopes)) {
+			$attributes['family_name'] = \ucwords(\mb_strtolower($adherent->name));
+			$attributes['given_name'] = \ucwords(\mb_strtolower($adherent->surname));
+			$attributes['name'] = $norm_name = $adherent->surname . ' ' . \mb_strtoupper($adherent->name);
+			$attributes['nickname'] = \mb_strtolower($adherent->nickname);
+			$attributes['locale'] = $adherent->language;
+			$attributes['preferred_username'] = $adherent->login;
+			if($adherent->isMan())
+			{
+				$attributes['gender'] = 'male';
+			}
+			if($adherent->isWoman())
+			{
+				$attributes['gender'] = 'female';
+			}
+			$attributes['updated_at'] = $adherent->modification_date->getTimestamp();
+		}
+
+		if(in_array('email', $scopes)) {
+			$attributes['email'] = $adherent->email;
+		}
+
+		if(in_array('galette', $scopes)) {
+			$attributes['galette_uptodate'] = ($adherent->isActive() && $adherent->isUp2Date()) || $adherent->isAdmin();
+			$attributes['galette_status'] = $adherent->id_statut;
+			$attributes['galette_status_priority'] = (new GaletteStatus($adherent->status))->third;
+			$attributes['galette_staff'] = $adherent->isStaff();
+
+			$attributes['galette_groups'] = [];
+			foreach($adherent->getGroups() as $galette_group) {
+				$attributes['galette_groups'][] = normalizeGaletteGroup($galette_group);
+			}
+
+			$attributes['galette_managed_groups'] = [];
+			foreach($adherent->getManagedGroups() as $galette_group) {
+				$attributes['galette_managed_groups'][] = normalizeGaletteGroup($galette_group);
+			}
+		}
+
+		if(in_array('phone', $scopes)) {
+			$attributes['phone'] = $adherent->phone;
+		}
+
+		return $attributes;
+	}
+
+    private static function stripAccents($str)
+	{
+		//TODO seems shifted, "é" incorrectly replaced par "c"
+        return \strtr(\utf8_decode($str), \utf8_decode('ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝßàáâãäåæçèéêëìíîïñòóôõöøùúûüýÿĀāĂăĄąĆćĈĉĊċČčĎďĐđĒēĔĕĖėĘęĚěĜĝĞğĠġĢģĤĥĦħĨĩĪīĬĭĮįİıĲĳĴĵĶķĹĺĻļĽľĿŀŁłŃńŅņŇňŉŌōŎŏŐőŒœŔŕŖŗŘřŚśŜŝŞşŠšŢţŤťŦŧŨũŪūŬŭŮůŰűŲųŴŵŶŷŸŹźŻżŽžſƒƠơƯưǍǎǏǐǑǒǓǔǕǖǗǘǙǚǛǜǺǻǼǽǾǿ'), 'AAAAAAAECEEEEIIIIDNOOOOOOUUUUYsaaaaaaaeceeeeiiiinoooooouuuuyyAaAaAaCcCcCcCcDdDdEeEeEeEeEeGgGgGgGgHhHhIiIiIiIiIiIJijJjKkLlLlLlLlllNnNnNnnOoOoOoOEoeRrRrRrSsSsSsSsTtTtTtUuUuUuUuUuUuWwYyYZzZzZzsfOoUuAaIiOoUuUuUuUuUuAaAEaeOo');
+	}
+
+	private static function normalizeGaletteGroup($group_name)
+	{
+	}
+
+    public function getUserInfoAttributes(UserEntity $userEntity, $claims, $scopes)
+	{
+		return $this->getAttributes($userEntity, $claims, $scope);
+    }
+
+    public function getUserByIdentifier($identifier): ?UserEntityInterface
+	{
+		$zdb = $this->container->get('zdb');
+		$galette_user = new Adherent($zdb);
+		$galette_user->load($identifier);
+		return new UserEntity($galette_user);
     }
 
     /**
@@ -56,6 +139,7 @@ final class UserRepository implements UserRepositoryInterface
     ): void {
         Debug::log("getUserEntityByUserCredentials({$username}, '***', {$grantType}) ");
 
-        $uid = UserHelper::login($this->container, $username, $password);
+		$uid = UserHelper::login($this->container, $username, $password);
+		//TODO
     }
 }
