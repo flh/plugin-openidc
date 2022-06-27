@@ -22,7 +22,7 @@ chmod 660 *.key
 
 
 vendor/bin/generate-defuse-key
-copy-paste the hexadecimal string result in plugin-oauth2/config/encryption-key.php
+copy-paste the hexadecimal string result in plugin-oauth2/config/config.yml
 ```
 
 ## Configure a ClientEntity

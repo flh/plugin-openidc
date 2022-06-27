@@ -63,8 +63,9 @@ $container->set(
 
 $container->set(
     AuthorizationServer::class,
-    function (ContainerInterface $container) {
-        include OAUTH2_CONFIGPATH . '/encryption-key.php';
+	function (ContainerInterface $container) {
+		$conf = $container->get(Config::class);
+		$encryptionKey = $conf->get('global.encryption_key');
 
         // Setup the authorization server
         $server = new AuthorizationServer(
