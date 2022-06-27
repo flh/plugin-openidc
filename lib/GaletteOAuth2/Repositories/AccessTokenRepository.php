@@ -43,7 +43,7 @@ final class AccessTokenRepository implements AccessTokenRepositoryInterface
     /**
      * {@inheritDoc}
      */
-    public function persistNewAccessToken(AccessTokenEntityInterface $accessTokenEntity): void
+    public function persistNewAccessToken(LeagueAccessTokenEntityInterface $accessTokenEntity)
     {
         // Some logic here to save the access token to a database
     }
