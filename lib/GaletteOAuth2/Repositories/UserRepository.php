@@ -62,7 +62,7 @@ final class UserRepository implements UserRepositoryInterface
 		if(in_array('profile', $scopes)) {
 			$attributes['family_name'] = \ucwords(\mb_strtolower($adherent->name));
 			$attributes['given_name'] = \ucwords(\mb_strtolower($adherent->surname));
-			$attributes['name'] = $norm_name = $adherent->surname . ' ' . \mb_strtoupper($adherent->name);
+			$attributes['name'] = $adherent->sfullname;
 			$attributes['nickname'] = \mb_strtolower($adherent->nickname);
 			$attributes['locale'] = $adherent->language;
 			$attributes['preferred_username'] = $adherent->login;
@@ -74,7 +74,8 @@ final class UserRepository implements UserRepositoryInterface
 			{
 				$attributes['gender'] = 'female';
 			}
-			$attributes['updated_at'] = $adherent->modification_date->getTimestamp();
+			$updated_at = \DateTime::createFromFormat('!' . __("Y-m-d"), $adherent->modification_date);
+			$attributes['updated_at'] = $updated_at->getTimestamp();
 		}
 
 		if(in_array('email', $scopes)) {
@@ -83,18 +84,18 @@ final class UserRepository implements UserRepositoryInterface
 
 		if(in_array('galette', $scopes)) {
 			$attributes['galette_uptodate'] = ($adherent->isActive() && $adherent->isUp2Date()) || $adherent->isAdmin();
-			$attributes['galette_status'] = $adherent->id_statut;
-			$attributes['galette_status_priority'] = (new GaletteStatus($adherent->status))->third;
+			$attributes['galette_status'] = $adherent->status;
+			$attributes['galette_status_priority'] = (new GaletteStatus($zdb, $adherent->status))->third;
 			$attributes['galette_staff'] = $adherent->isStaff();
 
 			$attributes['galette_groups'] = [];
 			foreach($adherent->getGroups() as $galette_group) {
-				$attributes['galette_groups'][] = normalizeGaletteGroup($galette_group);
+				$attributes['galette_groups'][] = self::normalizeGaletteGroup($galette_group);
 			}
 
 			$attributes['galette_managed_groups'] = [];
 			foreach($adherent->getManagedGroups() as $galette_group) {
-				$attributes['galette_managed_groups'][] = normalizeGaletteGroup($galette_group);
+				$attributes['galette_managed_groups'][] = self::normalizeGaletteGroup($galette_group);
 			}
 		}
 
@@ -111,8 +112,16 @@ final class UserRepository implements UserRepositoryInterface
         return \strtr(\utf8_decode($str), \utf8_decode('ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝßàáâãäåæçèéêëìíîïñòóôõöøùúûüýÿĀāĂăĄąĆćĈĉĊċČčĎďĐđĒēĔĕĖėĘęĚěĜĝĞğĠġĢģĤĥĦħĨĩĪīĬĭĮįİıĲĳĴĵĶķĹĺĻļĽľĿŀŁłŃńŅņŇňŉŌōŎŏŐőŒœŔŕŖŗŘřŚśŜŝŞşŠšŢţŤťŦŧŨũŪūŬŭŮůŰűŲųŴŵŶŷŸŹźŻżŽžſƒƠơƯưǍǎǏǐǑǒǓǔǕǖǗǘǙǚǛǜǺǻǼǽǾǿ'), 'AAAAAAAECEEEEIIIIDNOOOOOOUUUUYsaaaaaaaeceeeeiiiinoooooouuuuyyAaAaAaCcCcCcCcDdDdEeEeEeEeEeGgGgGgGgHhHhIiIiIiIiIiIJijJjKkLlLlLlLlllNnNnNnnOoOoOoOEoeRrRrRrSsSsSsSsTtTtTtUuUuUuUuUuUuWwYyYZzZzZzsfOoUuAaIiOoUuUuUuUuUuAaAEaeOo');
 	}
 
-	private static function normalizeGaletteGroup($group_name)
+	private static function normalizeGaletteGroup($group)
 	{
+		$path = [];
+		$current_group = $group;
+		while($current_group)
+		{
+			array_unshift($path, $current_group->getName());
+			$current_group = $current_group->getParentGroup();
+		}
+		return $path;
 	}
 
     public function getUserInfoAttributes(UserEntityInterface $userEntity, $claims, $scopes)

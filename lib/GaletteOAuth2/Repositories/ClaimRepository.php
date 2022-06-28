@@ -60,6 +60,12 @@ class ClaimRepository implements ClaimRepositoryInterface
 			['email_verified', ClaimEntity::TYPE_USERINFO, false],
 		],
 		'galette' => [
+			['galette_uptodate', ClaimEntity::TYPE_USERINFO, false],
+			['galette_status', ClaimEntity::TYPE_USERINFO, false],
+			['galette_status_priority', ClaimEntity::TYPE_USERINFO, false],
+			['galette_staff', ClaimEntity::TYPE_USERINFO, false],
+			['galette_groups', ClaimEntity::TYPE_USERINFO, false],
+			['galette_managed_groups', ClaimEntity::TYPE_USERINFO, false],
 		],
 	];
 
