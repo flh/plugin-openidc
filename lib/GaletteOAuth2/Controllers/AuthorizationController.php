@@ -83,8 +83,8 @@ final class AuthorizationController extends AbstractPluginController
             // The auth request object can be serialized into a user's session
             $authRequest = $server->validateAuthorizationRequest($request);
 
-            $user = new UserEntity();
-            $user->setIdentifier($_SESSION['user_id']);
+	    $user = new UserEntity();
+	    $user->setIdentifier($_SESSION['user_id']);
             $authRequest->setUser($user);
 
             //TODO : Scopes implementation

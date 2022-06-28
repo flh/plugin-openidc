@@ -45,106 +45,103 @@ use League\OAuth2\Server\Grant\RefreshTokenGrant;
 use League\OAuth2\Server\ResourceServer;
 use Psr\Container\ContainerInterface;
 use Idaas\OpenID\Grant\AuthCodeGrant;
+use Idaas\OpenID\Grant\ImplicitGrant;
 use Idaas\OpenID\RequestTypes\AuthenticationRequest;
+use Idaas\OpenID\ResponseTypes\BearerTokenResponse;
 use Idaas\OpenID\Session;
 
 if (OAUTH2_LOG) {
-    Debug::init();
+	Debug::init();
 }
 
 $container = $this->getContainer();
 
 $container->set(
-    Config::class,
-    static function (ContainerInterface $container) {
-        return new GaletteOAuth2\Tools\Config(OAUTH2_CONFIGPATH . '/config.yml');
-    },
+	Config::class,
+	static function (ContainerInterface $container) {
+		return new GaletteOAuth2\Tools\Config(OAUTH2_CONFIGPATH . '/config.yml');
+	},
 );
 
 $container->set(
-    AuthorizationServer::class,
+	AuthorizationServer::class,
 	function (ContainerInterface $container) {
 		$conf = $container->get(Config::class);
 		$encryptionKey = $conf->get('global.encryption_key');
 
-        // Setup the authorization server
-        $server = new AuthorizationServer(
-        // instance of ClientRepositoryInterface
-            new ClientRepository($container),
-            // instance of AccessTokenRepositoryInterface
-            new AccessTokenRepository(),
-            // instance of ScopeRepositoryInterface
-            new ScopeRepository(),
-            // path to private key
-            'file://' . OAUTH2_CONFIGPATH . '/private.key',
-            // encryption key
-            Key::loadFromAsciiSafeString($encryptionKey),
-        );
+		// Setup the authorization server
+		$server = new AuthorizationServer(
+		// instance of ClientRepositoryInterface
+			new ClientRepository($container),
+			// instance of AccessTokenRepositoryInterface
+			new AccessTokenRepository(),
+			// instance of ScopeRepositoryInterface
+			new ScopeRepository(),
+			// path to private key
+			'file://' . OAUTH2_CONFIGPATH . '/private.key',
+			// encryption key
+		Key::loadFromAsciiSafeString($encryptionKey),
+		// Custom BearerTokenResponse for OpenID Connect
+		new BearerTokenResponse,
+		);
 
-	$refreshTokenRepository = new RefreshTokenRepository();
-	$claimRepository = new ClaimRepository();
+		$refreshTokenRepository = new RefreshTokenRepository();
+		$claimRepository = new ClaimRepository();
 
-        $grant = new AuthCodeGrant(
-            new AuthCodeRepository(),
-            // instance of RefreshTokenRepositoryInterface
-	    $refreshTokenRepository,
-	    $claimRepository,
-	    new Session,
-	    new DateInterval('PT10M'),
-            new DateInterval('PT10M'),
-        );
+		$authCodeGrant = new AuthCodeGrant(
+			new AuthCodeRepository(),
+			// instance of RefreshTokenRepositoryInterface
+			$refreshTokenRepository,
+			$claimRepository,
+			new Session,
+			new DateInterval('PT10M'),
+			new DateInterval('PT10M'),
+		);
 
-        // Enable the password grant on the server
-        // with a token TTL of 1 hour
-        $server->enableGrantType(
-            $grant,
-            // access tokens will expire after 1 hour
-            new DateInterval('PT1H'),
-        );
+		$authCodeGrant->setIssuer('https://' . $_SERVER['HTTP_HOST']);
+	
+		// Enable the password grant on the server
+		// with a token TTL of 1 hour
+		$server->enableGrantType(
+			$authCodeGrant,
+			// access tokens will expire after 1 hour
+			new DateInterval('PT1H'),
+		);
 
-        $rt_grant = new RefreshTokenGrant($refreshTokenRepository);
-        // new refresh tokens will expire after 1 month
-        $rt_grant->setRefreshTokenTTL(new DateInterval('P1M'));
+		$userRepository = new UserRepository($container); // instance of UserRepositoryInterface
+		$implicitGrant = new ImplicitGrant(
+			$userRepository,
+			$claimRepository,
+			new DateInterval('PT10M'),
+			new DateInterval('PT10M')
+		);
+		$implicitGrant->setIssuer('https://' . $_SERVER['HTTP_HOST']);
 
-        // Enable the refresh token grant on the server
-        $server->enableGrantType(
-            $rt_grant,
-            // new access tokens will expire after an hour
-            new DateInterval('PT1H'),
-        );
+		$server->enableGrantType($implicitGrant, new DateInterval('PT1H'));
 
-        $userRepository = new UserRepository($container); // instance of UserRepositoryInterface
-        $grant = new \League\OAuth2\Server\Grant\PasswordGrant(
-            $userRepository,
-            $refreshTokenRepository,
-        );
+		$rt_grant = new RefreshTokenGrant($refreshTokenRepository);
+		// new refresh tokens will expire after 1 month
+		$rt_grant->setRefreshTokenTTL(new DateInterval('P1M'));
 
-        $grant->setRefreshTokenTTL(new \DateInterval('P1M')); // refresh tokens will expire after 1 month
+		// Enable the refresh token grant on the server
+		$server->enableGrantType(
+			$rt_grant,
+			// new access tokens will expire after an hour
+			new DateInterval('PT1H'),
+		);
 
-        // Enable the password grant on the server
-        $server->enableGrantType(
-            $grant,
-            new \DateInterval('PT1H'), // access tokens will expire after 1 hour
-        );
-
-        // Enable the client credentials grant on the server
-        $server->enableGrantType(
-            new \League\OAuth2\Server\Grant\ClientCredentialsGrant(),
-            new \DateInterval('PT1H'), // access tokens will expire after 1 hour
-        );
-
-        return $server;
-    },
+		return $server;
+	},
 );
 
 $container->set(
-    ResourceServer::class,
-    static function (ContainerInterface $container) {
-        $publicKeyPath = 'file://' . OAUTH2_CONFIGPATH . '/public.key';
+	ResourceServer::class,
+	static function (ContainerInterface $container) {
+		$publicKeyPath = 'file://' . OAUTH2_CONFIGPATH . '/public.key';
 
-        return new ResourceServer(
-            new AccessTokenRepository(),
-            $publicKeyPath,
-        );
-    },
+		return new ResourceServer(
+			new AccessTokenRepository(),
+			$publicKeyPath,
+		);
+	},
 );

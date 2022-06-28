@@ -33,8 +33,9 @@ declare(strict_types=1);
 namespace GaletteOAuth2\Repositories;
 
 use League\OAuth2\Server\Entities\ClientEntityInterface;
-use IDaas\OpenID\Repositories\UserRepositoryInterface;
-use IDaas\OpenID\Repositories\UserRepositoryTrait;
+use Idaas\OpenID\Repositories\UserRepositoryInterface;
+use Idaas\OpenID\Repositories\UserRepositoryTrait;
+use League\OAuth2\Server\Entities\UserEntityInterface;
 use Psr\Container\ContainerInterface as ContainerInterface;
 use Galette\Entity\Adherent;
 use GaletteOAuth2\Entities\UserEntity;
@@ -51,13 +52,12 @@ final class UserRepository implements UserRepositoryInterface
         $this->container = $container;
     }
 
-    public function getAttributes(UserEntity $userEntity, $claims, $scopes)
+    public function getAttributes(UserEntityInterface $userEntity, $claims, $scopes)
 	{
-		$attributes = [
-			'sub' => $userEntity->getIdentifier(),
-		];
-
-		$adherent = $userEntity->getAdherent();
+		$attributes = [];
+		$zdb = $this->container->get('zdb');
+		$adherent = new Adherent($zdb);
+		$adherent->load($userEntity->getIdentifier());
 
 		if(in_array('profile', $scopes)) {
 			$attributes['family_name'] = \ucwords(\mb_strtolower($adherent->name));
@@ -115,17 +115,16 @@ final class UserRepository implements UserRepositoryInterface
 	{
 	}
 
-    public function getUserInfoAttributes(UserEntity $userEntity, $claims, $scopes)
-	{
-		return $this->getAttributes($userEntity, $claims, $scope);
+    public function getUserInfoAttributes(UserEntityInterface $userEntity, $claims, $scopes)
+    {
+		return $this->getAttributes($userEntity, $claims, $scopes);
     }
 
     public function getUserByIdentifier($identifier): ?UserEntityInterface
 	{
-		$zdb = $this->container->get('zdb');
-		$galette_user = new Adherent($zdb);
-		$galette_user->load($identifier);
-		return new UserEntity($galette_user);
+		$user = new UserEntity();
+		$user->setIdentifier($identifier);
+		return $user;
     }
 
     /**

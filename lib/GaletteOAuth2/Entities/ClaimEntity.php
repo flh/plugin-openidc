@@ -33,7 +33,7 @@ declare(strict_types=1);
 namespace GaletteOAuth2\Entities;
 
 use Idaas\OpenID\Entities\ClaimEntityInterface;
-namespace League\OAuth2\Server\Entities\Traits;
+use League\OAuth2\Server\Entities\Traits\EntityTrait;
 
 class ClaimEntity implements ClaimEntityInterface
 {

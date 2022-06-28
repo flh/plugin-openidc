@@ -66,8 +66,7 @@ final class ScopeRepository implements ScopeRepositoryInterface
 	 */
 	public function getScopeEntityByIdentifier($scopeIdentifier)
 	{
-
-		if (\array_key_exists($scopeIdentifier, $scopes) === false) {
+		if (\array_key_exists($scopeIdentifier, self::$scopes) === false) {
 			return;
 		}
 
