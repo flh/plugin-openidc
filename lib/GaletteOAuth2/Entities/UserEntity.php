@@ -39,17 +39,4 @@ use Galette\Entity\Adherent;
 final class UserEntity implements UserEntityInterface
 {
 	use EntityTrait;
-
-	private Adherent $galette_user;
-
-	public function __construct(Adherent $user)
-	{
-		$this->galette_user = $user;
-		$this->setIdentifier($member->id);
-	}
-
-	public function getAdherent()
-	{
-		return $this->galette_user;
-	}
 }

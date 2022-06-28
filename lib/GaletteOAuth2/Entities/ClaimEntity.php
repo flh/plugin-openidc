@@ -71,4 +71,13 @@ class ClaimEntity implements ClaimEntityInterface
 	{
 		return $this->essential;
 	}
+
+    public function jsonSerialize() : mixed
+    {
+        return json_encode([
+            self::IDENTIFIER    => $this->getIdentifier(),
+            self::ESSENTIAL     => $this->getEssential(),
+            self::TYPE          => $this->getType()
+        ]);
+    }
 }
