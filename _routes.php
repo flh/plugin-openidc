@@ -36,6 +36,7 @@ declare(strict_types=1);
 use GaletteOpenIDC\Controllers\ApiController;
 use GaletteOpenIDC\Controllers\AuthorizationController;
 use GaletteOpenIDC\Controllers\LoginController;
+use GaletteOpenIDC\Controllers\ConfigurationController;
 use GaletteOpenIDC\Middleware\Authentication;
 
 //Include specific classes (league/oauth2_server and tools)
