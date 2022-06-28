@@ -55,7 +55,7 @@ $this->map(['GET', 'POST'], '/authorize', [AuthorizationController::class, 'auth
     ->setName(OPENIDC_PREFIX . '_authorize')->add(Authentication::class);
 $this->post('/access_token', [AuthorizationController::class, 'token'])->setName(OPENIDC_PREFIX . '_token');
 
-$this->get('/user', [ApiController::class, 'user'])->setName(OPENIDC_PREFIX . '_user');
+$this->map(['GET', 'POST'], '/user', [ApiController::class, 'user'])->setName(OPENIDC_PREFIX . '_user');
 
 $this->get('/openid-configuration', [ConfigurationController::class, 'openid'])->setName(OPENIDC_PREFIX . '_openid_configuration');
 $this->get('/jwk', [ConfigurationController::class, 'json_web_key'])->setName(OPENIDC_PREFIX . '_json_web_key');
