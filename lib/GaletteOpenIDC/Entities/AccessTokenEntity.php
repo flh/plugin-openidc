@@ -26,15 +26,39 @@ declare(strict_types=1);
  *  @category Plugins
  *  @package  OpenID Connect plugin for Galette
  *
- *  @author    Manuel Hervouet <manuelh78dev@ik.me>
- *  @author    Florian Hatat <github@hatat.me>
+ *  @author	Manuel Hervouet <manuelh78dev@ik.me>
+ *  @author	Florian Hatat <github@hatat.me>
  *  @copyright Manuel Hervouet (c) 2021
  *  @copyright Florian Hatat (c) 2022
  *  @license   http://www.gnu.org/licenses/gpl-3.0.html GPL License 3.0
  */
 
-\define('OPENIDC_LOG', false);
-\define('OPENIDC_DEBUGSESSION', false);
-\define('OPENIDC_CONFIGPATH', __DIR__ . '/config'); //For more security, you can move this folder
+namespace GaletteOpenIDC\Entities;
 
-\define('OPENIDC_PREFIX', 'openidc');
+use Idaas\OpenID\Entities\AccessTokenEntityInterface;
+use Idaas\OpenID\Entities\Traits\AccessTokenTrait;
+use Idaas\OpenID\Entities\ClaimEntityInterface;
+use League\OAuth2\Server\Entities\Traits\EntityTrait;
+use League\OAuth2\Server\Entities\Traits\TokenEntityTrait;
+
+final class AccessTokenEntity implements AccessTokenEntityInterface
+{
+	use AccessTokenTrait;
+	use TokenEntityTrait;
+	use EntityTrait;
+
+	/**
+	 * @var ClaimEntityInterface[]
+	 */
+	protected $claims = [];
+
+	public function getClaims()
+	{
+		return $this->claims;
+	}
+
+	public function addClaim(ClaimEntityInterface $claim)
+	{
+		$this->claims[$claim->getIdentifier()] = $claim;
+	}
+}

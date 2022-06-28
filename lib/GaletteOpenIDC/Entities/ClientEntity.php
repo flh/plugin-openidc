@@ -26,15 +26,36 @@ declare(strict_types=1);
  *  @category Plugins
  *  @package  OpenID Connect plugin for Galette
  *
- *  @author    Manuel Hervouet <manuelh78dev@ik.me>
- *  @author    Florian Hatat <github@hatat.me>
+ *  @author	Manuel Hervouet <manuelh78dev@ik.me>
+ *  @author	Florian Hatat <github@hatat.me>
  *  @copyright Manuel Hervouet (c) 2021
  *  @copyright Florian Hatat (c) 2022
  *  @license   http://www.gnu.org/licenses/gpl-3.0.html GPL License 3.0
  */
 
-\define('OPENIDC_LOG', false);
-\define('OPENIDC_DEBUGSESSION', false);
-\define('OPENIDC_CONFIGPATH', __DIR__ . '/config'); //For more security, you can move this folder
+namespace GaletteOpenIDC\Entities;
 
-\define('OPENIDC_PREFIX', 'openidc');
+use League\OAuth2\Server\Entities\ClientEntityInterface;
+use League\OAuth2\Server\Entities\Traits\ClientTrait;
+use League\OAuth2\Server\Entities\Traits\EntityTrait;
+
+final class ClientEntity implements ClientEntityInterface
+{
+	use EntityTrait;
+	use ClientTrait;
+
+	public function setName($name): void
+	{
+		$this->name = $name;
+	}
+
+	public function setRedirectUri($uri): void
+	{
+		$this->redirectUri = $uri;
+	}
+
+	public function setConfidential(): void
+	{
+		$this->isConfidential = true;
+	}
+}

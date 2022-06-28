@@ -26,15 +26,50 @@ declare(strict_types=1);
  *  @category Plugins
  *  @package  OpenID Connect plugin for Galette
  *
- *  @author    Manuel Hervouet <manuelh78dev@ik.me>
- *  @author    Florian Hatat <github@hatat.me>
+ *  @author	Manuel Hervouet <manuelh78dev@ik.me>
+ *  @author	Florian Hatat <github@hatat.me>
  *  @copyright Manuel Hervouet (c) 2021
  *  @copyright Florian Hatat (c) 2022
  *  @license   http://www.gnu.org/licenses/gpl-3.0.html GPL License 3.0
  */
 
-\define('OPENIDC_LOG', false);
-\define('OPENIDC_DEBUGSESSION', false);
-\define('OPENIDC_CONFIGPATH', __DIR__ . '/config'); //For more security, you can move this folder
+namespace GaletteOpenIDC\Repositories;
 
-\define('OPENIDC_PREFIX', 'openidc');
+use GaletteOpenIDC\Entities\RefreshTokenEntity;
+use League\OAuth2\Server\Entities\RefreshTokenEntityInterface;
+use League\OAuth2\Server\Repositories\RefreshTokenRepositoryInterface;
+
+final class RefreshTokenRepository implements RefreshTokenRepositoryInterface
+{
+	/**
+	 * {@inheritDoc}
+	 */
+	public function persistNewRefreshToken(RefreshTokenEntityInterface $refreshTokenEntity): void
+	{
+		// Some logic to persist the refresh token in a database
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public function revokeRefreshToken($tokenId): void
+	{
+		// Some logic to revoke the refresh token in a database
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public function isRefreshTokenRevoked($tokenId)
+	{
+		return false; // The refresh token has not been revoked
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public function getNewRefreshToken()
+	{
+		return new RefreshTokenEntity();
+	}
+}

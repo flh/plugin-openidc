@@ -26,15 +26,61 @@ declare(strict_types=1);
  *  @category Plugins
  *  @package  OpenID Connect plugin for Galette
  *
- *  @author    Manuel Hervouet <manuelh78dev@ik.me>
- *  @author    Florian Hatat <github@hatat.me>
+ *  @author	Manuel Hervouet <manuelh78dev@ik.me>
+ *  @author	Florian Hatat <github@hatat.me>
  *  @copyright Manuel Hervouet (c) 2021
  *  @copyright Florian Hatat (c) 2022
  *  @license   http://www.gnu.org/licenses/gpl-3.0.html GPL License 3.0
  */
 
-\define('OPENIDC_LOG', false);
-\define('OPENIDC_DEBUGSESSION', false);
-\define('OPENIDC_CONFIGPATH', __DIR__ . '/config'); //For more security, you can move this folder
+namespace GaletteOpenIDC\Entities;
 
-\define('OPENIDC_PREFIX', 'openidc');
+use Idaas\OpenID\Entities\ClaimEntityInterface;
+use League\OAuth2\Server\Entities\Traits\EntityTrait;
+
+class ClaimEntity implements ClaimEntityInterface
+{
+	const TYPE_ID_TOKEN = 'id_token';
+	const TYPE_USERINFO = 'userinfo';
+
+	use EntityTrait;
+
+	private $type;
+	private $essential;
+
+	public function __construct($identifier, $type, $essential)
+	{
+		$this->setIdentifier($identifier);
+		$this->type = $type;
+		$this->essential = $essential;
+	}
+
+	/**
+	 * Get type of the claim
+	 *
+	 * @return string userinfo|id_token
+	 */
+	public function getType()
+	{
+		return $this->type;
+	}
+
+	/**
+	 * Whether this is an essential claim
+	 *
+	 * @return boolean
+	 */
+	public function getEssential()
+	{
+		return $this->essential;
+	}
+
+	public function jsonSerialize() : mixed
+	{
+		return json_encode([
+			self::IDENTIFIER	=> $this->getIdentifier(),
+			self::ESSENTIAL	 => $this->getEssential(),
+			self::TYPE		  => $this->getType()
+		]);
+	}
+}

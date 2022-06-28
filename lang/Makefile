@@ -2,7 +2,7 @@ INSTALLDIR = .
 LANGUAGES = `find ./ -name "oauth2_*.po" -print | sed 's|^\./oauth2_\(.*\).po|\1|'`
 DOMAINS = oauth2
 PHP_SOURCES = $(shell find ../ -maxdepth 1 -name \*.php) \
-              $(shell find ../lib/GaletteOAuth2/ -name \*.php) \
+              $(shell find ../lib/GaletteOpenIDC/ -name \*.php) \
               $(shell find ../templates -name \*.tpl)
 
 

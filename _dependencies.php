@@ -3,43 +3,46 @@
 declare(strict_types=1);
 
 /**
- * Plugin OAuth2 for Galette Project
+ *  OpenID Connect plugin for Galette
  *
  *  PHP version 7
  *
- *  This file is part of 'Plugin OAuth2 for Galette Project'.
+ *  This file is part of 'OpenID Connect plugin for Galette'.
  *
- *  Plugin OAuth2 for Galette Project is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
+ *  OpenID Connect Plugin for Galette is free software: you can redistribute it
+ *  and/or modify it under the terms of the GNU General Public License as
+ *  published by the Free Software Foundation, either version 3 of the License,
+ *  or (at your option) any later version.
  *
- *  Plugin OAuth2 for Galette Project is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  OpenID Connect Plugin for Galette is distributed in the hope that it will
+ *  be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General
+ *  Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with Plugin OAuth2 for Galette Project. If not, see <http://www.gnu.org/licenses/>.
+ *  You should have received a copy of the GNU General Public License along
+ *  with OpenID Connect Plugin for Galette. If not, see
+ *  <http://www.gnu.org/licenses/>.
  *
  *  @category Plugins
- *  @package  Plugin OAuth2 for Galette Project
+ *  @package  OpenID Connect plugin for Galette
  *
- *  @author    Manuel Hervouet <manuelh78dev@ik.me>
+ *  @author	Manuel Hervouet <manuelh78dev@ik.me>
+ *  @author	Florian Hatat <github@hatat.me>
  *  @copyright Manuel Hervouet (c) 2021
+ *  @copyright Florian Hatat (c) 2022
  *  @license   http://www.gnu.org/licenses/gpl-3.0.html GPL License 3.0
  */
 
 use Defuse\Crypto\Key;
-use GaletteOAuth2\Repositories\AccessTokenRepository;
-use GaletteOAuth2\Repositories\AuthCodeRepository;
-use GaletteOAuth2\Repositories\ClientRepository;
-use GaletteOAuth2\Repositories\RefreshTokenRepository;
-use GaletteOAuth2\Repositories\ScopeRepository;
-use GaletteOAuth2\Repositories\UserRepository;
-use GaletteOAuth2\Repositories\ClaimRepository;
-use GaletteOAuth2\Tools\Config;
-use GaletteOAuth2\Tools\Debug as Debug;
+use GaletteOpenIDC\Repositories\AccessTokenRepository;
+use GaletteOpenIDC\Repositories\AuthCodeRepository;
+use GaletteOpenIDC\Repositories\ClientRepository;
+use GaletteOpenIDC\Repositories\RefreshTokenRepository;
+use GaletteOpenIDC\Repositories\ScopeRepository;
+use GaletteOpenIDC\Repositories\UserRepository;
+use GaletteOpenIDC\Repositories\ClaimRepository;
+use GaletteOpenIDC\Tools\Config;
+use GaletteOpenIDC\Tools\Debug as Debug;
 use League\OAuth2\Server\AuthorizationServer;
 use League\OAuth2\Server\Grant\RefreshTokenGrant;
 use League\OAuth2\Server\ResourceServer;
@@ -50,7 +53,7 @@ use Idaas\OpenID\RequestTypes\AuthenticationRequest;
 use Idaas\OpenID\ResponseTypes\BearerTokenResponse;
 use Idaas\OpenID\Session;
 
-if (OAUTH2_LOG) {
+if (OPENIDC_LOG) {
 	Debug::init();
 }
 
@@ -59,7 +62,7 @@ $container = $this->getContainer();
 $container->set(
 	Config::class,
 	static function (ContainerInterface $container) {
-		return new GaletteOAuth2\Tools\Config(OAUTH2_CONFIGPATH . '/config.yml');
+		return new GaletteOpenIDC\Tools\Config(OPENIDC_CONFIGPATH . '/config.yml');
 	},
 );
 
@@ -78,7 +81,7 @@ $container->set(
 			// instance of ScopeRepositoryInterface
 			new ScopeRepository(),
 			// path to private key
-			'file://' . OAUTH2_CONFIGPATH . '/private.key',
+			'file://' . OPENIDC_CONFIGPATH . '/private.key',
 			// encryption key
 		Key::loadFromAsciiSafeString($encryptionKey),
 		// Custom BearerTokenResponse for OpenID Connect
@@ -137,7 +140,7 @@ $container->set(
 $container->set(
 	ResourceServer::class,
 	static function (ContainerInterface $container) {
-		$publicKeyPath = 'file://' . OAUTH2_CONFIGPATH . '/public.key';
+		$publicKeyPath = 'file://' . OPENIDC_CONFIGPATH . '/public.key';
 
 		return new ResourceServer(
 			new AccessTokenRepository(),
