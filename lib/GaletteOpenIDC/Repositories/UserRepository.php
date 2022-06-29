@@ -63,7 +63,9 @@ final class UserRepository implements UserRepositoryInterface
 		$adherent = new Adherent($zdb);
 		$adherent->load(intval($userEntity->getIdentifier()));
 
-		if(in_array('profile', $scopes)) {
+		$scope_names = array_map(function($s){ return $s->getIdentifier(); }, $scopes);
+
+		if(in_array('profile', $scope_names)) {
 			$attributes['family_name'] = \ucwords(\mb_strtolower($adherent->name));
 			$attributes['given_name'] = \ucwords(\mb_strtolower($adherent->surname));
 			$attributes['name'] = $adherent->sfullname;
@@ -82,11 +84,11 @@ final class UserRepository implements UserRepositoryInterface
 			$attributes['updated_at'] = $updated_at->getTimestamp();
 		}
 
-		if(in_array('email', $scopes)) {
+		if(in_array('email', $scope_names)) {
 			$attributes['email'] = $adherent->email;
 		}
 
-		if(in_array('galette', $scopes)) {
+		if(in_array('galette', $scope_names)) {
 			$attributes['galette_uptodate'] = ($adherent->isActive() && $adherent->isUp2Date()) || $adherent->isAdmin();
 			$attributes['galette_status'] = $adherent->status;
 			$attributes['galette_status_priority'] = (new GaletteStatus($zdb, $adherent->status))->third;
@@ -103,7 +105,7 @@ final class UserRepository implements UserRepositoryInterface
 			}
 		}
 
-		if(in_array('phone', $scopes)) {
+		if(in_array('phone', $scope_names)) {
 			$attributes['phone'] = $adherent->phone;
 		}
 
