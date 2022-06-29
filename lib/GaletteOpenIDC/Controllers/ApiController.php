@@ -26,8 +26,8 @@ declare(strict_types=1);
  *  @category Plugins
  *  @package  OpenID Connect plugin for Galette
  *
- *  @author    Manuel Hervouet <manuelh78dev@ik.me>
- *  @author    Florian Hatat <github@hatat.me>
+ *  @author	Manuel Hervouet <manuelh78dev@ik.me>
+ *  @author	Florian Hatat <github@hatat.me>
  *  @copyright Manuel Hervouet (c) 2021
  *  @copyright Florian Hatat (c) 2022
  *  @license   http://www.gnu.org/licenses/gpl-3.0.html GPL License 3.0
@@ -42,53 +42,31 @@ use GaletteOpenIDC\Authorization\UserHelper;
 use GaletteOpenIDC\Tools\Config;
 use GaletteOpenIDC\Tools\Debug;
 use League\OAuth2\Server\ResourceServer;
+use Idaas\OpenID\UserInfo;
 use Psr\Container\ContainerInterface;
 use Slim\Http\Request;
 use Slim\Http\Response;
 
 final class ApiController extends AbstractPluginController
 {
-    /**
-     * @Inject("Plugin Galette OpenID Connect")
-     */
-    protected $module_info;
-    protected $container;
-    protected $config;
+	/**
+	 * @Inject("Plugin Galette OpenID Connect")
+	 */
+	protected $module_info;
+	protected $container;
+	protected $config;
 
-    // constructor receives container instance
-    public function __construct(ContainerInterface $container)
-    {
-        $this->container = $container;
-        $this->config = $container->get(Config::class);
-    }
+	// constructor receives container instance
+	public function __construct(ContainerInterface $container)
+	{
+		$this->container = $container;
+		$this->config = $container->get(Config::class);
+	}
 
-    public function user(Request $request, Response $response): Response
-    {
-        Debug::logRequest('api/user()', $request);
-
-        $server = $this->container->get(ResourceServer::class);
-        $rep = $server->validateAuthenticatedRequest($request);
-
-        $oauth_user_id = (int) $rep->getAttribute('oauth_user_id'); //SESSION is empty, use decrypted data
-        $options = UserHelper::mergeOptions($this->config, $rep->getAttribute('oauth_client_id'), $rep->getAttribute('oauth_scopes'));
-
-        Debug::log("api/user() load {$oauth_user_id} - " . Debug::printVar($options));
-
-        try {
-            $data = UserHelper::getUserData($this->container, $oauth_user_id, $options);
-        } catch (UserAuthorizationException $e) {
-            $r2 = new Response();
-            $r2->getBody()->write($e->getMessage());
-            Debug::log('api/user() error : ' . $e->getMessage());
-
-            return $r2->withStatus(200);
-        }
-
-        Debug::log('api/user() return data = ' . Debug::printVar($data));
-
-        $response->getBody()->write(\json_encode($data));
-        Debug::log('api/user() exit.');
-
-        return $response->withStatus(200);
-    }
+	public function user(Request $request, Response $response): Response
+	{
+		Debug::logRequest('api/user()', $request);
+		$userinfo = $this->container->get(UserInfo::class);
+		return $userinfo->respondToUserInfoRequest($request, $response);
+	}
 }

@@ -52,6 +52,7 @@ use Idaas\OpenID\Grant\ImplicitGrant;
 use Idaas\OpenID\RequestTypes\AuthenticationRequest;
 use Idaas\OpenID\ResponseTypes\BearerTokenResponse;
 use Idaas\OpenID\Session;
+use Idaas\OpenID\UserInfo;
 
 if (OPENIDC_LOG) {
 	Debug::init();
@@ -173,6 +174,18 @@ $container->set(
 		return new ResourceServer(
 			$container->get(AccessTokenRepository::class),
 			$publicKeyPath,
+		);
+	},
+);
+
+$container->set(
+	UserInfo::class,
+	static function (ContainerInterface $container) {
+		return new UserInfo(
+			new UserRepository($container),
+			$container->get(AccessTokenRepository::class),
+			$container->get(ResourceServer::class),
+			$container->get(ClaimRepository::class),
 		);
 	},
 );
