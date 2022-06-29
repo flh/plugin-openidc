@@ -36,19 +36,50 @@ declare(strict_types=1);
 namespace GaletteOpenIDC\Repositories;
 
 use GaletteOpenIDC\Entities\AccessTokenEntity;
-use League\OAuth2\Server\Entities\ClientEntityInterface;
+use GaletteOpenIDC\Repositories\ClientRepository;
+use GaletteOpenIDC\Repositories\ScopeRepository;
+use GaletteOpenIDC\Repositories\ClaimRepository;
 use Idaas\OpenID\Entities\AccessTokenEntityInterface;
-use League\OAuth2\Server\Entities\AccessTokenEntityInterface as LeagueAccessTokenEntityInterface;
 use Idaas\OpenID\Repositories\AccessTokenRepositoryInterface;
+use League\OAuth2\Server\Entities\ClientEntityInterface;
+use League\OAuth2\Server\Entities\AccessTokenEntityInterface as LeagueAccessTokenEntityInterface;
+use Psr\Container\ContainerInterface;
 
 final class AccessTokenRepository implements AccessTokenRepositoryInterface
 {
+	private $container;
+
+	public function __construct(ContainerInterface $container)
+	{
+		$this->container = $container;
+	}
+
 	/**
 	 * {@inheritDoc}
 	 */
 	public function persistNewAccessToken(LeagueAccessTokenEntityInterface $accessTokenEntity) : void
 	{
-		// Some logic here to save the access token to a database
+		// Save access token to database
+		$zdb = $this->container->get('zdb');
+		$scopes = [];
+		foreach($accessTokenEntity->getScopes() as $scope) {
+			$scopes[] = $scope->getIdentifier();
+		}
+		$query = $zdb->insert(AccessTokenEntity::TABLE)->values(
+			[
+				'token_id' => $accessTokenEntity->getIdentifier(),
+				'id_adh' => $accessTokenEntity->getUserIdentifier(),
+				'client_id' => $accessTokenEntity->getClient()->getIdentifier(),
+				'scopes' => json_encode($scopes),
+				'expiry' => $accessTokenEntity->getExpiryDateTime()->format("Y-m-d H:i:s"),
+				'revoked' => 0,
+			]
+		);
+		$zdb->execute($query);
+
+		// Regularly cleanup old expired tokens
+		$query = $zdb->delete(AccessTokenEntity::TABLE)->where(function($w){$w->lessThan('expiry', (new \DateTimeImmutable("1 day ago"))->format("Y-m-d H:i:s"));});
+		$zdb->execute($query);
 	}
 
 	/**
@@ -88,7 +119,34 @@ final class AccessTokenRepository implements AccessTokenRepositoryInterface
 	 */
 	public function getAccessToken($tokenId)
 	{
-		// TODO
+		$zdb = $this->container->get('zdb');
+		$query = $zdb->select(AccessTokenEntity::TABLE)->where([AccessTokenEntity::PK => $tokenId]);
+		$results = $zdb->execute($query);
+
+		if($results->count() !== 1) {
+			return null;
+		}
+
+		$rs = $results->current();
+		$clientRepository = $this->container->get(ClientRepository::class);
+		$scopeRepository = $this->container->get(ScopeRepository::class);
+		$claimRepository = $this->container->get(ClaimRepository::class);
+
+		$accessToken = new AccessTokenEntity();
+		$accessToken->setIdentifier($rs->token_id);
+		$accessToken->setUserIdentifier($rs->id_adh);
+		$accessToken->setClient($clientRepository->getClientEntity($rs->client_id));
+		$accessToken->setExpiryDateTime(new \DateTimeImmutable($rs->expiry));
+		foreach(json_decode($rs->scopes) as $scope_id) {
+			$scope = $scopeRepository->getScopeEntityByIdentifier($scope_id);
+			$accessToken->addScope($scope);
+
+			foreach($claimRepository->getClaimsByScope($scope) as $claim) {
+				$accessToken->addClaim($claim);
+			}
+		}
+
+		return $accessToken;
 	}
 
 	/**

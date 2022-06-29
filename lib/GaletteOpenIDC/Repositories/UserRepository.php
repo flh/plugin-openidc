@@ -61,7 +61,7 @@ final class UserRepository implements UserRepositoryInterface
 		$attributes = [];
 		$zdb = $this->container->get('zdb');
 		$adherent = new Adherent($zdb);
-		$adherent->load($userEntity->getIdentifier());
+		$adherent->load(intval($userEntity->getIdentifier()));
 
 		if(in_array('profile', $scopes)) {
 			$attributes['family_name'] = \ucwords(\mb_strtolower($adherent->name));

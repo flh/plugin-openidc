@@ -47,6 +47,9 @@ final class AccessTokenEntity implements AccessTokenEntityInterface
 	use TokenEntityTrait;
 	use EntityTrait;
 
+	public const TABLE = 'plugin_openidc_access_tokens';
+	public const PK = 'token_id';
+
 	/**
 	 * @var ClaimEntityInterface[]
 	 */
