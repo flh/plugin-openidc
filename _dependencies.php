@@ -67,6 +67,34 @@ $container->set(
 );
 
 $container->set(
+	ClaimRepository::class,
+	static function(ContainerInterface $container) {
+		return new ClaimRepository();
+	},
+);
+
+$container->set(
+	AccessTokenRepository::class,
+	static function(ContainerInterface $container) {
+		return new AccessTokenRepository($container);
+	},
+);
+
+$container->get(
+	ClientRepository::class,
+	static function(ContainerInterface $container) {
+		return new ClientRepository($container);
+	},
+);
+
+$container->get(
+	ScopeRepository::class,
+	static function(ContainerInterface $container) {
+		return new ScopeRepository();
+	},
+);
+
+$container->set(
 	AuthorizationServer::class,
 	function (ContainerInterface $container) {
 		$conf = $container->get(Config::class);
@@ -75,11 +103,11 @@ $container->set(
 		// Setup the authorization server
 		$server = new AuthorizationServer(
 		// instance of ClientRepositoryInterface
-			new ClientRepository($container),
+			$container->get(ClientRepository::class),
 			// instance of AccessTokenRepositoryInterface
-			new AccessTokenRepository(),
+			$container->get(AccessTokenRepository::class),
 			// instance of ScopeRepositoryInterface
-			new ScopeRepository(),
+			$container->get(ScopeRepository::class),
 			// path to private key
 			'file://' . OPENIDC_CONFIGPATH . '/private.key',
 			// encryption key
@@ -89,7 +117,7 @@ $container->set(
 		);
 
 		$refreshTokenRepository = new RefreshTokenRepository();
-		$claimRepository = new ClaimRepository();
+		$claimRepository = $container->get(ClaimRepository::class);
 
 		$authCodeGrant = new AuthCodeGrant(
 			new AuthCodeRepository(),
@@ -143,7 +171,7 @@ $container->set(
 		$publicKeyPath = 'file://' . OPENIDC_CONFIGPATH . '/public.key';
 
 		return new ResourceServer(
-			new AccessTokenRepository(),
+			$container->get(AccessTokenRepository::class),
 			$publicKeyPath,
 		);
 	},
