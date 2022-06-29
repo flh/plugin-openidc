@@ -132,7 +132,9 @@ final class UserRepository implements UserRepositoryInterface
 
 	public function getUserInfoAttributes(UserEntityInterface $userEntity, $claims, $scopes)
 	{
-		return $this->getAttributes($userEntity, $claims, $scopes);
+		$attributes = $this->getAttributes($userEntity, $claims, $scopes);
+		$attributes['sub'] = $userEntity->getIdentifier();
+		return $attributes;
 	}
 
 	public function getUserByIdentifier($identifier): ?UserEntityInterface
