@@ -87,7 +87,10 @@ final class AccessTokenRepository implements AccessTokenRepositoryInterface
 	 */
 	public function revokeAccessToken($tokenId): void
 	{
-		// Some logic here to revoke the access token
+		$zdb = $this->container->get('zdb');
+		// Revoke access token in database
+		$query = $zdb->update(AccessTokenEntity::TABLE)->set(['revoked' => true])->where([AccessTokenEntity::PK => $tokenId]);
+		$zdb->execute($query);
 	}
 
 	/**
@@ -95,7 +98,16 @@ final class AccessTokenRepository implements AccessTokenRepositoryInterface
 	 */
 	public function isAccessTokenRevoked($tokenId)
 	{
-		return false; // Access token hasn't been revoked
+		$zdb = $this->container->get('zdb');
+		$query = $zdb->select(AccessTokenEntity::TABLE)->where([AccessTokenEntity::PK => $tokenId]);
+		$results = $zdb->execute($query);
+
+		// Access token does not exist, assume it has been revoked
+		if($results->count() !== 1) {
+			return true;
+		}
+
+		return boolval($results->current()->revoked);
 	}
 
 	/**
