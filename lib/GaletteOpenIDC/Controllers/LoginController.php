@@ -102,7 +102,7 @@ final class LoginController extends AbstractPluginController
 		if (0 === $uid) {
 			return $this->view->render(
 				$response,
-				'file:[' . $this->getModuleRoute() . ']oauth2_login.tpl',
+				'file:[' . $this->getModuleRoute() . ']openidc_login.tpl',
 				\array_merge(
 					$this->prepareVarsForm(),
 					[
@@ -124,7 +124,7 @@ final class LoginController extends AbstractPluginController
 
 			return $this->view->render(
 				$response,
-				'file:[' . $this->getModuleRoute() . ']oauth2_login.tpl',
+				'file:[' . $this->getModuleRoute() . ']openidc_login.tpl',
 				\array_merge(
 					$this->prepareVarsForm(),
 					[
