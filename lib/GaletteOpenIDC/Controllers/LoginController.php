@@ -145,6 +145,9 @@ final class LoginController extends AbstractPluginController
 			'state' => $_SESSION['request_args']['state'],
 			'redirect_uri' => $_SESSION['request_args']['redirect_uri'],
 		];
+		if(isset($_SESSION['request_args']['nonce'])) {
+			$url_params['nonce'] = $_SESSION['request_args']['nonce'];
+		}
 
 		$url = $this->router->pathFor(OPENIDC_PREFIX . '_authorize', [], $url_params);
 
