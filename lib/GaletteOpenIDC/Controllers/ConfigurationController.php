@@ -72,7 +72,7 @@ final class ConfigurationController extends AbstractPluginController
 		'token_endpoint' => $issuer . $this->router->pathFor(OPENIDC_PREFIX . '_token', [], []),
 		'response_types_supported' => ['code', 'id_token', 'token id_token'],
 		'subject_types_supported' => ['public'],
-		'id_token_signing_alg_values_supported' => ['RSA256'],
+		'id_token_signing_alg_values_supported' => ['RS256'],
 		'scopes_supported' => array_keys(ScopeRepository::getScopes()),
 		'claims_supported' => ClaimRepository::getAllClaims(),
 	];
