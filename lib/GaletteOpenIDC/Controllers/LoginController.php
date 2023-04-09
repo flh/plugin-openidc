@@ -149,6 +149,10 @@ final class LoginController extends AbstractPluginController
 			$url_params['nonce'] = $_SESSION['request_args']['nonce'];
 		}
 
+		if(isset($_SESSION['request_args']['nonce'])) {
+			$url_params['nonce'] = $_SESSION['request_args']['nonce'];
+		}
+
 		$url = $this->router->pathFor(OPENIDC_PREFIX . '_authorize', [], $url_params);
 
 		$response = new Response();
