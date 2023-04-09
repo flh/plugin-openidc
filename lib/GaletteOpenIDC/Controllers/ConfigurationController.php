@@ -82,25 +82,25 @@ final class ConfigurationController extends AbstractPluginController
 
 	public function json_web_key(Request $request, Response $response): Response
 	{
-	$key = new CryptKey('file://' . OPENIDC_CONFIGPATH . '/public.key');
-	$openssl_key = \openssl_pkey_get_public($key->getKeyPath());
-	$key_details = \openssl_pkey_get_details($openssl_key);
-	$key_data = ['use' => 'sig', 'kid' => 'signing key'];
-	if($key_details['type'] == OPENSSL_KEYTYPE_RSA)
-	{
-		$key_data['kty'] = 'RSA';
-		$key_data['n'] = rtrim(strtr(base64_encode($key_details['rsa']['n']), '+/', '-_'), '=');
-		$key_data['e'] = rtrim(strtr(base64_encode($key_details['rsa']['e']), '+/', '-_'), '=');
-	}
-	elseif($key_details['type'] == OPENSSL_KEYTYPE_EC)
-	{
-		$key_data['kty'] = 'EC';
-		$key_data['crv'] = $key_details['ec']['curve_name'];
-		$key_data['x'] = rtrim(strtr(base64_encode($key_details['ec']['x']), '+/', '-_'), '=');
-		$key_data['y'] = rtrim(strtr(base64_encode($key_details['ec']['y']), '+/', '-_'), '=');
-	}
-	$data = ['keys' => [$key_data]];
-	$response->getBody()->write(\json_encode($data));
-	return $response->withStatus(200)->withHeader('Content-type', 'application/jwk-set+json');
+		$key = new CryptKey('file://' . OPENIDC_CONFIGPATH . '/public.key');
+		$openssl_key = \openssl_pkey_get_public($key->getKeyPath());
+		$key_details = \openssl_pkey_get_details($openssl_key);
+		$key_data = ['use' => 'sig', 'kid' => 'signing key'];
+		if($key_details['type'] == OPENSSL_KEYTYPE_RSA)
+		{
+			$key_data['kty'] = 'RSA';
+			$key_data['n'] = rtrim(strtr(base64_encode($key_details['rsa']['n']), '+/', '-_'), '=');
+			$key_data['e'] = rtrim(strtr(base64_encode($key_details['rsa']['e']), '+/', '-_'), '=');
+		}
+		elseif($key_details['type'] == OPENSSL_KEYTYPE_EC)
+		{
+			$key_data['kty'] = 'EC';
+			$key_data['crv'] = $key_details['ec']['curve_name'];
+			$key_data['x'] = rtrim(strtr(base64_encode($key_details['ec']['x']), '+/', '-_'), '=');
+			$key_data['y'] = rtrim(strtr(base64_encode($key_details['ec']['y']), '+/', '-_'), '=');
+		}
+		$data = ['keys' => [$key_data]];
+		$response->getBody()->write(\json_encode($data));
+		return $response->withStatus(200)->withHeader('Content-type', 'application/jwk-set+json');
 	}
 }
