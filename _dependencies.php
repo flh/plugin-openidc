@@ -103,7 +103,7 @@ $container->set(
 
 		// Setup the authorization server
 		$server = new AuthorizationServer(
-		// instance of ClientRepositoryInterface
+			// instance of ClientRepositoryInterface
 			$container->get(ClientRepository::class),
 			// instance of AccessTokenRepositoryInterface
 			$container->get(AccessTokenRepository::class),
@@ -112,9 +112,9 @@ $container->set(
 			// path to private key
 			'file://' . OPENIDC_CONFIGPATH . '/private.key',
 			// encryption key
-		Key::loadFromAsciiSafeString($encryptionKey),
-		// Custom BearerTokenResponse for OpenID Connect
-		new BearerTokenResponse,
+			Key::loadFromAsciiSafeString($encryptionKey),
+			// Custom BearerTokenResponse for OpenID Connect
+			new BearerTokenResponse,
 		);
 
 		$refreshTokenRepository = new RefreshTokenRepository();
