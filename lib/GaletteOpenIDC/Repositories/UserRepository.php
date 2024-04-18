@@ -109,6 +109,11 @@ final class UserRepository implements UserRepositoryInterface
 			$attributes['phone'] = $adherent->phone;
 		}
 
+		if(in_array('nextcloud', $scope_names)) {
+			$attributes['groups'] = [];
+			$attributes['groups'][] = $adherent->getDynamicFields()->getValues(4)[0]['text_val'];
+		}
+
 		return $attributes;
 	}
 

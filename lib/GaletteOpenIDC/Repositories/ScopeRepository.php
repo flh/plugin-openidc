@@ -57,6 +57,9 @@ final class ScopeRepository implements ScopeRepositoryInterface
 		'profile' => [
 			'description' => 'Extended personnal user information',
 		],
+		'nextcloud' => [
+			'description' => 'Group membership for Nextcloud',
+		],
 	];
 
 	public static function getScopes()

@@ -68,6 +68,9 @@ class ClaimRepository implements ClaimRepositoryInterface
 			['galette_groups', ClaimEntity::TYPE_USERINFO, false],
 			['galette_managed_groups', ClaimEntity::TYPE_USERINFO, false],
 		],
+		'nextcloud' => [
+			['groups', ClaimEntity::TYPE_USERINFO, false],
+		],
 	];
 
 	public static function getScopeClaims()
