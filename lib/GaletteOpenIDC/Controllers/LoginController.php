@@ -35,20 +35,22 @@ declare(strict_types=1);
 
 namespace GaletteOpenIDC\Controllers;
 
+use DI\Attribute\Inject;
 use Galette\Controllers\AbstractPluginController;
 use GaletteOpenIDC\Authorization\UserAuthorizationException;
 use GaletteOpenIDC\Authorization\UserHelper;
 use GaletteOpenIDC\Tools\Config;
 use GaletteOpenIDC\Tools\Debug as Debug;
 use Psr\Container\ContainerInterface;
-use Slim\Http\Request;
-use Slim\Http\Response;
+use Slim\Psr7\Request;
+use Slim\Psr7\Response;
 
 final class LoginController extends AbstractPluginController
 {
 	/**
-	 * @Inject("Plugin Galette OpenID Connect")
+	 * @var array
 	 */
+	#[Inject("Plugin Galette OpenID Connect")]
 	protected $module_info;
 	protected $container;
 	protected $config;
@@ -56,8 +58,9 @@ final class LoginController extends AbstractPluginController
 	// constructor receives container instance
 	public function __construct(ContainerInterface $container)
 	{
+		parent::__construct($container);
 		$this->container = $container;
-		$this->config = $this->container->get(Config::class);
+		$this->config = $container->get(Config::class);
 	}
 
 	public function login(Request $request, Response $response): Response
@@ -65,7 +68,8 @@ final class LoginController extends AbstractPluginController
 		Debug::logRequest('login()', $request);
 
 		if ($request->getMethod() === 'GET') {
-			$redirect_url = $request->getQueryParam('redirect_url', null);
+			$query_params = $request->getQueryParams();
+			$redirect_url = $query_params['redirect_url'] ?? null;
 
 			if ($redirect_url) {
 				$url = \urldecode($redirect_url);
@@ -81,7 +85,7 @@ final class LoginController extends AbstractPluginController
 			// display page
 			return $this->view->render(
 				$response,
-				'file:[' . $this->getModuleRoute() . ']' . OPENIDC_PREFIX . '_login.tpl',
+				$this->getTemplate('openidc_login'),
 				$this->prepareVarsForm(),
 			);
 		}
@@ -102,7 +106,7 @@ final class LoginController extends AbstractPluginController
 		if (0 === $uid) {
 			return $this->view->render(
 				$response,
-				'file:[' . $this->getModuleRoute() . ']openidc_login.tpl',
+				$this->getTemplate('openidc_login'),
 				\array_merge(
 					$this->prepareVarsForm(),
 					[
@@ -124,7 +128,7 @@ final class LoginController extends AbstractPluginController
 
 			return $this->view->render(
 				$response,
-				'file:[' . $this->getModuleRoute() . ']openidc_login.tpl',
+				$this->getTemplate('openidc_login'),
 				\array_merge(
 					$this->prepareVarsForm(),
 					[
@@ -149,11 +153,7 @@ final class LoginController extends AbstractPluginController
 			$url_params['nonce'] = $_SESSION['request_args']['nonce'];
 		}
 
-		if(isset($_SESSION['request_args']['nonce'])) {
-			$url_params['nonce'] = $_SESSION['request_args']['nonce'];
-		}
-
-		$url = $this->router->pathFor(OPENIDC_PREFIX . '_authorize', [], $url_params);
+		$url = $this->routeparser->urlFor(OPENIDC_PREFIX . '_authorize', [], $url_params);
 
 		$response = new Response();
 
@@ -195,7 +195,7 @@ final class LoginController extends AbstractPluginController
 			'application' => $application,
 			'prefix' => OPENIDC_PREFIX,
 			//TODO:
-			'path_css' => $this->router->pathFor('slash') . '../plugins/plugin-oauth2/webroot/',
+			//'path_css' => $this->router->pathFor('slash') . '../plugins/plugin-oauth2/webroot/',
 		];
 	}
 }

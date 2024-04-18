@@ -36,47 +36,45 @@ declare(strict_types=1);
 namespace GaletteOpenIDC\Middleware;
 
 use GaletteOpenIDC\Tools\Debug as Debug;
-use Psr\Container\ContainerInterface;
-use Psr\Http\Message\ResponseInterface as RequestHandler;
+use DI\Container;
+use Slim\Routing\RouteParser;
 use Psr\Http\Message\ServerRequestInterface as Request;
-use Slim\Psr7\Response;
+use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Server\RequestHandlerInterface as RequestHandler;
 
 final class Authentication
 {
     private $container;
 
-    public function __construct(ContainerInterface $container)
+    public function __construct(Container $container)
     {
-        $this->container = $container;
+	    $this->container = $container;
+	    $this->routeparser = $container->get(RouteParser::class);
     }
 
-    //public function __invoke(Request $request, RequestHandler $handler) //slim v4
-    public function __invoke($request, $response, $next)
+    public function __invoke(Request $request, RequestHandler $handler) //slim v4
     {
         $loggedIn = $_SESSION['isLoggedIn'] ?? '';
 
         if ('yes' !== $loggedIn) {
-            $url = $this->container->get('router')->pathFor(
+            $url = $this->routeparser->urlFor(
                 OPENIDC_PREFIX . '_login',
                 [],
                 ['redirect_url' => $_SERVER['REQUEST_URI']],
             );
             Debug::log("Redirect to {$url}");
 
-            //$response = new Response();
+            $response = new \Slim\Psr7\Response();
             // If the user is not logged in, redirect them to login
             return $response->withHeader('Location', $url)
                 ->withStatus(302);
         }
 
-        return $next($request, $response);
-        /* Slim v4
         // The user must be logged in, so pass this request
         // down the middleware chain
         $response = $handler->handle($request);
 
         // And pass the request back up the middleware chain.
         return $response;
-         */
     }
 }

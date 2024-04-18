@@ -48,14 +48,14 @@ require_once $module['root'] . '/_config.inc.php';
 require_once '_dependencies.php';
 
 //login is always called by a http_redirect
-$this->map(['GET', 'POST'], '/login', [LoginController::class, 'login'])->setName(OPENIDC_PREFIX . '_login');
-$this->map(['GET', 'POST'], '/logout', [LoginController::class, 'logout'])->setName(OPENIDC_PREFIX . '_logout');
+$app->map(['GET', 'POST'], '/login', [LoginController::class, 'login'])->setName(OPENIDC_PREFIX . '_login');
+$app->map(['GET', 'POST'], '/logout', [LoginController::class, 'logout'])->setName(OPENIDC_PREFIX . '_logout');
 
-$this->map(['GET', 'POST'], '/authorize', [AuthorizationController::class, 'authorize'])
+$app->map(['GET', 'POST'], '/authorize', [AuthorizationController::class, 'authorize'])
     ->setName(OPENIDC_PREFIX . '_authorize')->add(Authentication::class);
-$this->post('/access_token', [AuthorizationController::class, 'token'])->setName(OPENIDC_PREFIX . '_token');
+$app->post('/access_token', [AuthorizationController::class, 'token'])->setName(OPENIDC_PREFIX . '_token');
 
-$this->map(['GET', 'POST'], '/user', [ApiController::class, 'user'])->setName(OPENIDC_PREFIX . '_user');
+$app->map(['GET', 'POST'], '/user', [ApiController::class, 'user'])->setName(OPENIDC_PREFIX . '_user');
 
-$this->get('/openid-configuration', [ConfigurationController::class, 'openid'])->setName(OPENIDC_PREFIX . '_openid_configuration');
-$this->get('/jwk', [ConfigurationController::class, 'json_web_key'])->setName(OPENIDC_PREFIX . '_json_web_key');
+$app->get('/openid-configuration', [ConfigurationController::class, 'openid'])->setName(OPENIDC_PREFIX . '_openid_configuration');
+$app->get('/jwk', [ConfigurationController::class, 'json_web_key'])->setName(OPENIDC_PREFIX . '_json_web_key');

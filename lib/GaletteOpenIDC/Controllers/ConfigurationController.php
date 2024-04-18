@@ -35,21 +35,23 @@ declare(strict_types=1);
 
 namespace GaletteOpenIDC\Controllers;
 
+use DI\Attribute\Inject;
 use Galette\Controllers\AbstractPluginController;
 use GaletteOpenIDC\Repositories\ScopeRepository;
 use GaletteOpenIDC\Repositories\ClaimRepository;
 use GaletteOpenIDC\Tools\Config;
 use GaletteOpenIDC\Tools\Debug as Debug;
 use Psr\Container\ContainerInterface;
-use Slim\Http\Request;
-use Slim\Http\Response;
+use Slim\Psr7\Request;
+use Slim\Psr7\Response;
 use League\OAuth2\Server\CryptKey;
 
 final class ConfigurationController extends AbstractPluginController
 {
 	/**
-	 * @Inject("Plugin Galette OpenID Connect")
+	 * @var array
 	 */
+	#[Inject("Plugin Galette OpenID Connect")]
 	protected $module_info;
 	protected $container;
 	protected $config;
@@ -59,6 +61,7 @@ final class ConfigurationController extends AbstractPluginController
 	{
 		$this->container = $container;
 		$this->config = $this->container->get(Config::class);
+		parent::__construct($container);
 	}
 
 	public function openid(Request $request, Response $response): Response
@@ -67,9 +70,9 @@ final class ConfigurationController extends AbstractPluginController
 	$issuer = 'https://' . $_SERVER['HTTP_HOST'];
 	$data = [
 		'issuer' => $issuer,
-		'authorization_endpoint' => $issuer . $this->router->pathFor(OPENIDC_PREFIX . '_authorize', [], []),
-		'jwks_uri' => $issuer . $this->router->pathFor(OPENIDC_PREFIX . '_json_web_key', [], []),
-		'token_endpoint' => $issuer . $this->router->pathFor(OPENIDC_PREFIX . '_token', [], []),
+		'authorization_endpoint' => $issuer . $this->routeparser->urlFor(OPENIDC_PREFIX . '_authorize', [], []),
+		'jwks_uri' => $issuer . $this->routeparser->urlFor(OPENIDC_PREFIX . '_json_web_key', [], []),
+		'token_endpoint' => $issuer . $this->routeparser->urlFor(OPENIDC_PREFIX . '_token', [], []),
 		'response_types_supported' => ['code', 'id_token', 'token id_token'],
 		'subject_types_supported' => ['public'],
 		'id_token_signing_alg_values_supported' => ['RS256'],
@@ -82,25 +85,25 @@ final class ConfigurationController extends AbstractPluginController
 
 	public function json_web_key(Request $request, Response $response): Response
 	{
-		$key = new CryptKey('file://' . OPENIDC_CONFIGPATH . '/public.key');
-		$openssl_key = \openssl_pkey_get_public($key->getKeyPath());
-		$key_details = \openssl_pkey_get_details($openssl_key);
-		$key_data = ['use' => 'sig', 'kid' => 'signing key'];
-		if($key_details['type'] == OPENSSL_KEYTYPE_RSA)
-		{
-			$key_data['kty'] = 'RSA';
-			$key_data['n'] = rtrim(strtr(base64_encode($key_details['rsa']['n']), '+/', '-_'), '=');
-			$key_data['e'] = rtrim(strtr(base64_encode($key_details['rsa']['e']), '+/', '-_'), '=');
-		}
-		elseif($key_details['type'] == OPENSSL_KEYTYPE_EC)
-		{
-			$key_data['kty'] = 'EC';
-			$key_data['crv'] = $key_details['ec']['curve_name'];
-			$key_data['x'] = rtrim(strtr(base64_encode($key_details['ec']['x']), '+/', '-_'), '=');
-			$key_data['y'] = rtrim(strtr(base64_encode($key_details['ec']['y']), '+/', '-_'), '=');
-		}
-		$data = ['keys' => [$key_data]];
-		$response->getBody()->write(\json_encode($data));
-		return $response->withStatus(200)->withHeader('Content-type', 'application/jwk-set+json');
+	$key = new CryptKey('file://' . OPENIDC_CONFIGPATH . '/public.key');
+	$openssl_key = \openssl_pkey_get_public($key->getKeyPath());
+	$key_details = \openssl_pkey_get_details($openssl_key);
+	$key_data = ['use' => 'sig', 'kid' => 'signing key'];
+	if($key_details['type'] == OPENSSL_KEYTYPE_RSA)
+	{
+		$key_data['kty'] = 'RSA';
+		$key_data['n'] = rtrim(strtr(base64_encode($key_details['rsa']['n']), '+/', '-_'), '=');
+		$key_data['e'] = rtrim(strtr(base64_encode($key_details['rsa']['e']), '+/', '-_'), '=');
+	}
+	elseif($key_details['type'] == OPENSSL_KEYTYPE_EC)
+	{
+		$key_data['kty'] = 'EC';
+		$key_data['crv'] = $key_details['ec']['curve_name'];
+		$key_data['x'] = rtrim(strtr(base64_encode($key_details['ec']['x']), '+/', '-_'), '=');
+		$key_data['y'] = rtrim(strtr(base64_encode($key_details['ec']['y']), '+/', '-_'), '=');
+	}
+	$data = ['keys' => [$key_data]];
+	$response->getBody()->write(\json_encode($data));
+	return $response->withStatus(200)->withHeader('Content-type', 'application/jwk-set+json');
 	}
 }

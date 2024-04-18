@@ -40,14 +40,13 @@ use League\OAuth2\Server\Entities\Traits\EntityTrait;
 
 class ClaimEntity implements ClaimEntityInterface
 {
-	public const IDENTIFIER = 'id';
-	public const ESSENTIAL = 'essential';
-	public const TYPE = 'type';
-
 	use EntityTrait;
 
 	private $type;
 	private $essential;
+    public const IDENTIFIER = 'id';
+    public const ESSENTIAL = 'essential';
+    public const TYPE = 'type';
 
 	public function __construct($identifier, $type, $essential)
 	{
@@ -79,9 +78,9 @@ class ClaimEntity implements ClaimEntityInterface
 	public function jsonSerialize() : string
 	{
 		return json_encode([
-			self::IDENTIFIER => $this->getIdentifier(),
-			self::ESSENTIAL => $this->getEssential(),
-			self::TYPE => $this->getType()
+			self::IDENTIFIER	=> $this->getIdentifier(),
+			self::ESSENTIAL	 => $this->getEssential(),
+			self::TYPE		  => $this->getType()
 		]);
 	}
 }

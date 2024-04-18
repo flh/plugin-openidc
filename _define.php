@@ -38,7 +38,7 @@ $this->register(
     'OpenID Connect identity provider',   //Short description
     'Manuel Hervouet, Florian Hatat',     //Author
     '1.0.0',                //Version
-    '0.9.6',                //Galette compatible version
+    '1.0.0',                //Galette compatible version
     'openidc',               //routing name and translation domain
     '2022-06-28',           //Release date
     [//Permissions needed

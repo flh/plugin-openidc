@@ -36,6 +36,7 @@ declare(strict_types=1);
 
 namespace GaletteOpenIDC\Controllers;
 
+use DI\Attribute\Inject;
 use Galette\Controllers\AbstractPluginController;
 use GaletteOpenIDC\Authorization\UserAuthorizationException;
 use GaletteOpenIDC\Authorization\UserHelper;
@@ -44,14 +45,15 @@ use GaletteOpenIDC\Tools\Debug;
 use League\OAuth2\Server\ResourceServer;
 use Idaas\OpenID\UserInfo;
 use Psr\Container\ContainerInterface;
-use Slim\Http\Request;
-use Slim\Http\Response;
+use Slim\Psr7\Request;
+use Slim\Psr7\Response;
 
 final class ApiController extends AbstractPluginController
 {
 	/**
-	 * @Inject("Plugin Galette OpenID Connect")
+	 * @var array
 	 */
+	#[Inject("Plugin Galette OpenID Connect")]
 	protected $module_info;
 	protected $container;
 	protected $config;

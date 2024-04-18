@@ -46,6 +46,7 @@ use GaletteOpenIDC\Tools\Debug as Debug;
 use League\OAuth2\Server\AuthorizationServer;
 use League\OAuth2\Server\Grant\RefreshTokenGrant;
 use League\OAuth2\Server\ResourceServer;
+use Idaas\OpenID\CryptKey;
 use Psr\Container\ContainerInterface;
 use Idaas\OpenID\Grant\AuthCodeGrant;
 use Idaas\OpenID\Grant\ImplicitGrant;
@@ -54,11 +55,11 @@ use Idaas\OpenID\ResponseTypes\BearerTokenResponse;
 use Idaas\OpenID\Session;
 use Idaas\OpenID\UserInfo;
 
-if (OPENIDC_LOG) {
+/*if (OPENIDC_LOG) {
 	Debug::init();
-}
+}*/
 
-$container = $this->getContainer();
+$container = $app->getContainer();
 
 $container->set(
 	Config::class,
@@ -101,16 +102,21 @@ $container->set(
 		$conf = $container->get(Config::class);
 		$encryptionKey = $conf->get('global.encryption_key');
 
+		// Load private key
+		$privateKeyPath = 'file://' . OPENIDC_CONFIGPATH . '/private.key';
+		$privateKey = new CryptKey($privateKeyPath);
+		$privateKey->setKid('signing key');
+
 		// Setup the authorization server
 		$server = new AuthorizationServer(
-			// instance of ClientRepositoryInterface
+		// instance of ClientRepositoryInterface
 			$container->get(ClientRepository::class),
 			// instance of AccessTokenRepositoryInterface
 			$container->get(AccessTokenRepository::class),
 			// instance of ScopeRepositoryInterface
 			$container->get(ScopeRepository::class),
-			// path to private key
-			'file://' . OPENIDC_CONFIGPATH . '/private.key',
+			// private signing key
+			$privateKey,
 			// encryption key
 			Key::loadFromAsciiSafeString($encryptionKey),
 			// Custom BearerTokenResponse for OpenID Connect
@@ -170,10 +176,12 @@ $container->set(
 	ResourceServer::class,
 	static function (ContainerInterface $container) {
 		$publicKeyPath = 'file://' . OPENIDC_CONFIGPATH . '/public.key';
+		$publicKey = new CryptKey($publicKeyPath);
+		$publicKey->setKid('signing key');
 
 		return new ResourceServer(
 			$container->get(AccessTokenRepository::class),
-			$publicKeyPath,
+			$publicKey,
 		);
 	},
 );

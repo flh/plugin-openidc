@@ -68,7 +68,7 @@ final class UserRepository implements UserRepositoryInterface
 		if(in_array('profile', $scope_names)) {
 			$attributes['family_name'] = \ucwords(\mb_strtolower($adherent->name));
 			$attributes['given_name'] = \ucwords(\mb_strtolower($adherent->surname));
-			$attributes['name'] = $adherent->sfullname;
+			$attributes['name'] = $adherent->sname;
 			$attributes['nickname'] = \mb_strtolower($adherent->nickname);
 			$attributes['locale'] = $adherent->language;
 			$attributes['preferred_username'] = $adherent->login;

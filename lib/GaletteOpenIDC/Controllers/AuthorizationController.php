@@ -35,20 +35,22 @@ declare(strict_types=1);
 
 namespace GaletteOpenIDC\Controllers;
 
+use DI\Attribute\Inject;
 use Galette\Controllers\AbstractPluginController;
 use GaletteOpenIDC\Entities\UserEntity;
 use GaletteOpenIDC\Tools\Config as Config;
 use GaletteOpenIDC\Tools\Debug as Debug;
 use League\OAuth2\Server\AuthorizationServer;
 use Psr\Container\ContainerInterface;
-use Slim\Http\Request;
-use Slim\Http\Response;
+use Slim\Psr7\Request;
+use Slim\Psr7\Response;
 
 final class AuthorizationController extends AbstractPluginController
 {
 	/**
-	 * @Inject("Plugin Galette OpenID Connect")
+	 * @var array
 	 */
+	#[Inject("Plugin Galette OpenID Connect")]
 	protected $module_info;
 	protected $container;
 	protected $config;
@@ -86,8 +88,8 @@ final class AuthorizationController extends AbstractPluginController
 			// The auth request object can be serialized into a user's session
 			$authRequest = $server->validateAuthorizationRequest($request);
 
-			$user = new UserEntity();
-			$user->setIdentifier($_SESSION['user_id']);
+		$user = new UserEntity();
+		$user->setIdentifier($_SESSION['user_id']);
 			$authRequest->setUser($user);
 
 			//TODO : Scopes implementation

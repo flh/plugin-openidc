@@ -36,6 +36,7 @@ declare(strict_types=1);
 namespace GaletteOpenIDC\Repositories;
 
 use GaletteOpenIDC\Entities\AccessTokenEntity;
+use GaletteOpenIDC\Entities\ClaimEntity;
 use GaletteOpenIDC\Repositories\ClientRepository;
 use GaletteOpenIDC\Repositories\ScopeRepository;
 use GaletteOpenIDC\Repositories\ClaimRepository;
@@ -166,8 +167,13 @@ final class AccessTokenRepository implements AccessTokenRepositoryInterface
 	 */
 	public function storeClaims(LeagueAccessTokenEntityInterface $token, array $claims)
 	{
-		foreach($claims as $claim)
+		foreach($claims as $serclaim)
 		{
+			$claim = new ClaimEntity(
+				$serclaim[ClaimEntity::IDENTIFIER],
+				$serclaim[ClaimEntity::TYPE],
+				$serclaim[ClaimEntity::ESSENTIAL]
+			);
 			$token->addClaim($claim);
 		}
 	}
